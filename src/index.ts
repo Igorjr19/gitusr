@@ -2,27 +2,40 @@
 
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
+import chalk from 'chalk';
 
 function main() {
-  yargs()
+  yargs(hideBin(process.argv))
     .scriptName('gitusr')
-    .usage('$0 <cmd> [args]')
-    .command(
-      'hello [name]',
-      'welcome ter yargs!',
-      yargs => {
-        yargs.positional('name', {
-          type: 'string',
-          default: 'Cambi',
-          describe: 'the name to say hello to',
-        });
-      },
-      function (argv) {
-        console.log('hello', argv.name, 'welcome to yargs!');
-      }
+    .usage(chalk.blue('$0 <comando> [opções]'))
+
+    /**
+     * Comandos mínimos
+     */
+    .demandCommand(1, chalk.red('Você deve especificar um comando'))
+
+    /**
+     * Ajuda
+     */
+    .help('h')
+    .alias('h', 'help')
+
+    /**
+     * Versão
+     */
+    .version('gitusr 1.0.0')
+    .alias('v', 'version')
+
+    /**
+     * Mais informações
+     */
+    .epilog(
+      chalk.gray(
+        'Para mais informações, visite: https://github.com/Igorjr19/gitusr'
+      )
     )
-    .help()
-    .parse(hideBin(process.argv));
+
+    .parse();
 }
 
 main();

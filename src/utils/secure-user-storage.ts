@@ -16,6 +16,7 @@ import type {
   ConfigOptions,
   GitUser,
   UserStore,
+  ListedUser,
 } from './types.js';
 
 import { Logger } from './logger.js';
@@ -223,5 +224,24 @@ export class SecureUserStorage {
     await this.saveUsers(store);
 
     return newUser;
+  }
+
+  async listUsers(): Promise<ListedUser[]> {
+    const store = await this.loadUsers();
+
+    return Object.values(store.users).map(user => {
+      const listUser: ListedUser = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        isActive: store.activeUser === user.id,
+      };
+
+      if (user.description) {
+        listUser.description = user.description;
+      }
+
+      return listUser;
+    });
   }
 }

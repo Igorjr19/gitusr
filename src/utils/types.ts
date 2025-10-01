@@ -45,3 +45,15 @@ export interface AddUserOptions {
   description?: string;
   setAsActive?: boolean;
 }
+
+export interface ListUsersOptions {
+  showDetails?: boolean;
+}
+
+export interface ListedUser {
+  id: string;
+  name: string;
+  email: string;
+  description?: string;
+  isActive: boolean;
+}

@@ -8,6 +8,7 @@ import type { AddUserOptions } from './utils/types.js';
 
 import { addUser } from './commands/add-user.js';
 import { Commands } from './commands/commands.js';
+import { listUsers } from './commands/list-users.js';
 
 function main() {
   yargs(hideBin(process.argv))
@@ -66,6 +67,18 @@ function main() {
           options.description = argv.description as string;
         }
         await addUser(options);
+      }
+    )
+
+    /**
+     * Listar usuários
+     */
+    .command(
+      [Commands.listUsers.name, Commands.listUsers.alias],
+      chalk.yellow('Lista todos os usuários cadastrados'),
+      () => {},
+      async () => {
+        await listUsers();
       }
     )
 

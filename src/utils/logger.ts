@@ -21,11 +21,23 @@ export class Logger {
     console.log(chalk.gray(message));
   }
 
+  static default(message: string) {
+    console.log(chalk.white(message));
+  }
+
   static log(
     message: string,
     color: 'red' | 'green' | 'blue' | 'yellow' | 'gray' = 'gray'
   ) {
     const colorFunc = chalk[color] || chalk.gray;
     console.log(colorFunc(message));
+  }
+
+  static activeStatus(isActive: boolean): string {
+    return isActive ? chalk.green('● ATIVO') : chalk.gray('○');
+  }
+
+  static indexNumber(index: number): string {
+    return chalk.gray(`[${index}]`);
   }
 }

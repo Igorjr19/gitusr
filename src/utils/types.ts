@@ -62,3 +62,8 @@ export interface ListedUser {
   description?: string;
   isActive: boolean;
 }
+
+export interface RemoveUserOptions {
+  id?: string;
+  email?: string;
+}

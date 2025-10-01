@@ -1,12 +1,8 @@
 import { SecureUserStorage } from '../utils/secure-user-storage.js';
 import { Logger } from '../utils/logger.js';
+import type { SwitchUserOptions } from '../utils/types.js';
 
-export async function switchUser(
-  options: {
-    id?: string;
-    email?: string;
-  } = {}
-): Promise<void> {
+export async function switchUser(options: SwitchUserOptions): Promise<void> {
   const storage = new SecureUserStorage();
 
   if (!options.id && !options.email) {

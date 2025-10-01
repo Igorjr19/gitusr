@@ -277,4 +277,21 @@ export class SecureUserStorage {
 
     return true;
   }
+
+  async removeUser(userId: string): Promise<boolean> {
+    const store = await this.loadUsers();
+
+    if (!store.users[userId]) {
+      return false;
+    }
+
+    delete store.users[userId];
+
+    if (store.activeUser === userId) {
+      store.activeUser = undefined;
+    }
+
+    await this.saveUsers(store);
+    return true;
+  }
 }

@@ -1,0 +1,46 @@
+{
+  "name": "gitusr",
+  "version": "1.0.0",
+  "description": "CLI to manage multiple GitHub users",
+  "author": "Ígor José Rodrigues",
+  "keywords": [
+    "git",
+    "github",
+    "cli",
+    "user"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "main": "index.js",
+  "packageManager": "pnpm@10.17.1",
+  "scripts": {
+    "build": "tsc",
+    "start": "node ./dist/index.js",
+    "start:dev": "tsc --watch",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "lint": "eslint \"src/**/*.ts\" --fix",
+    "prepare": "husky",
+    "commitlint": "commitlint --edit"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^20.1.0",
+    "@commitlint/config-conventional": "^20.0.0",
+    "@eslint/js": "^9.36.0",
+    "@types/node": "^24.6.1",
+    "@typescript-eslint/eslint-plugin": "^8.45.0",
+    "@typescript-eslint/parser": "^8.45.0",
+    "eslint": "^9.36.0",
+    "eslint-config-prettier": "^10.1.8",
+    "husky": "^9.1.7",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.45.0"
+  },
+  "bin": {
+    "gitusr": "./dist/index.js"
+  },
+  "dependencies": {
+    "@types/yargs": "^17.0.33",
+    "yargs": "^18.0.0"
+  }
+}

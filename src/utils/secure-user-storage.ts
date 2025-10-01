@@ -9,11 +9,16 @@ import { promises as fs } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
 import { promisify } from 'util';
+
 import type {
   UserCredentials,
   EncryptedUserData,
   ConfigOptions,
+  GitUser,
+  UserStore,
 } from './types.js';
+
+import { Logger } from './logger.js';
 import { Errors } from './errors.js';
 
 const scryptAsync = promisify(scrypt);
@@ -109,5 +114,114 @@ export class SecureUserStorage {
     } catch {
       await fs.mkdir(this.configOptions.configDir, { recursive: true });
     }
+  }
+
+  private async loadUsers(): Promise<UserStore> {
+    try {
+      await this.ensureConfigDir();
+      const data = await fs.readFile(this.configOptions.storePath, 'utf8');
+      const parsed = JSON.parse(data) ?? {};
+
+      const users: Record<string, GitUser> = {};
+
+      for (const [userId, credentials] of Object.entries(parsed.users)) {
+        try {
+          const decryptedData = await this.decryptUserData(
+            credentials as UserCredentials
+          );
+
+          const user: GitUser = {
+            id: userId,
+            name: decryptedData.name,
+            email: decryptedData.email,
+            sshKeyPath: decryptedData.sshKeyPath,
+          };
+
+          if (decryptedData.description) {
+            user.description = decryptedData.description;
+          }
+
+          users[userId] = user;
+        } catch {
+          Logger.error(
+            `⚠️  Falha ao descriptografar dados do usuário com ID ${userId}. Os dados podem estar corrompidos ou a chave de criptografia mudou.`
+          );
+        }
+      }
+
+      return {
+        users,
+        activeUser: parsed.activeUser || undefined,
+      };
+    } catch {
+      return { users: {} };
+    }
+  }
+
+  private async saveUsers(store: UserStore): Promise<void> {
+    await this.ensureConfigDir();
+
+    const encryptedUsers: Record<string, UserCredentials> = {};
+
+    for (const [userId, user] of Object.entries(store.users)) {
+      const sensitiveData: EncryptedUserData = {
+        name: user.name,
+        email: user.email,
+        sshKeyPath: user.sshKeyPath,
+      };
+
+      if (user.description) {
+        sensitiveData.description = user.description;
+      }
+
+      encryptedUsers[userId] = await this.encryptUserData(sensitiveData);
+    }
+
+    const dataToSave = {
+      users: encryptedUsers,
+      activeUser: store.activeUser,
+      timestamp: new Date().toISOString(),
+    };
+
+    await fs.writeFile(
+      this.configOptions.storePath,
+      JSON.stringify(dataToSave, null, 2)
+    );
+  }
+
+  async addUser(
+    name: string,
+    email: string,
+    sshKeyPath: string,
+    description?: string
+  ): Promise<GitUser> {
+    try {
+      await fs.access(sshKeyPath);
+    } catch {
+      throw new Error(`${Errors.sshFileNotFound}: ${sshKeyPath}`);
+    }
+
+    const store = await this.loadUsers();
+    const userId = createHash('md5').update(email).digest('hex');
+
+    if (store.users[userId]) {
+      throw new Error(`${Errors.userExistsWithEmail}: ${email}`);
+    }
+
+    const newUser: GitUser = {
+      id: userId,
+      name,
+      email,
+      sshKeyPath,
+    };
+
+    if (description) {
+      newUser.description = description;
+    }
+
+    store.users[userId] = newUser;
+    await this.saveUsers(store);
+
+    return newUser;
   }
 }

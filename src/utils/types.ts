@@ -16,3 +16,32 @@ export interface ConfigOptions {
   configDir: string;
   storePath: string;
 }
+
+export interface UserStore {
+  users: Record<string, GitUser>;
+  activeUser?: string | undefined;
+  encryptionKey?: string;
+}
+
+export interface GitUser {
+  id: string;
+  name: string;
+  email: string;
+  sshKeyPath: string;
+  description?: string;
+}
+
+export interface Command {
+  name: string;
+  alias: string;
+  description: string;
+  execute: (options: unknown) => Promise<void>;
+}
+
+export interface AddUserOptions {
+  name: string;
+  email: string;
+  sshKeyPath: string;
+  description?: string;
+  setAsActive?: boolean;
+}

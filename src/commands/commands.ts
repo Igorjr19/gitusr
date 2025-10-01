@@ -3,6 +3,7 @@ import type { Command } from '../utils/types.js';
 import { addUser } from './add-user.js';
 import { listUsers } from './list-users.js';
 import { removeUser } from './remove-user.js';
+import { status } from './status.js';
 import { switchUser } from './switch-user.js';
 
 export const Commands = {
@@ -29,5 +30,11 @@ export const Commands = {
     alias: 'rm',
     description: 'Remove um usuário pelo ID ou email',
     execute: removeUser,
+  },
+  status: {
+    name: 'status',
+    alias: 'st',
+    description: 'Mostra o usuário ativo atual',
+    execute: status,
   },
 } satisfies Record<string, Command>;

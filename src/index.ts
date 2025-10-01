@@ -15,6 +15,7 @@ import { Commands } from './commands/commands.js';
 import { listUsers } from './commands/list-users.js';
 import { switchUser } from './commands/switch-user.js';
 import { removeUser } from './commands/remove-user.js';
+import { status } from './commands/status.js';
 
 function main() {
   yargs(hideBin(process.argv))
@@ -166,6 +167,16 @@ function main() {
         if (argv.email) options.email = argv.email as string;
         await removeUser(options);
       }
+    )
+
+    /**
+     * Status atual
+     */
+    .command(
+      [Commands.status.name, Commands.status.alias],
+      chalk.yellow('Mostra o usuário ativo atual'),
+      () => {},
+      status
     )
 
     /**

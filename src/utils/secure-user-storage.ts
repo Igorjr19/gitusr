@@ -244,4 +244,37 @@ export class SecureUserStorage {
       return listUser;
     });
   }
+
+  async getUser(userId: string): Promise<GitUser | null> {
+    const store = await this.loadUsers();
+    return store.users[userId] || null;
+  }
+
+  async findUserByEmail(email: string): Promise<GitUser | null> {
+    const userId = createHash('md5').update(email).digest('hex');
+    return this.getUser(userId);
+  }
+
+  async getActiveUser(): Promise<GitUser | null> {
+    const store = await this.loadUsers();
+
+    if (!store.activeUser) {
+      return null;
+    }
+
+    return store.users[store.activeUser] || null;
+  }
+
+  async setActiveUser(userId: string): Promise<boolean> {
+    const store = await this.loadUsers();
+
+    if (!store.users[userId]) {
+      return false;
+    }
+
+    store.activeUser = userId;
+    await this.saveUsers(store);
+
+    return true;
+  }
 }

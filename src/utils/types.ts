@@ -46,6 +46,11 @@ export interface AddUserOptions {
   setAsActive?: boolean;
 }
 
+export interface SwitchUserOptions {
+  id?: string;
+  email?: string;
+}
+
 export interface ListUsersOptions {
   showDetails?: boolean;
 }

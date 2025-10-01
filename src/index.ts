@@ -4,11 +4,12 @@ import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import chalk from 'chalk';
 
-import type { AddUserOptions } from './utils/types.js';
+import type { AddUserOptions, SwitchUserOptions } from './utils/types.js';
 
 import { addUser } from './commands/add-user.js';
 import { Commands } from './commands/commands.js';
 import { listUsers } from './commands/list-users.js';
+import { switchUser } from './commands/switch-user.js';
 
 function main() {
   yargs(hideBin(process.argv))
@@ -79,6 +80,46 @@ function main() {
       () => {},
       async () => {
         await listUsers();
+      }
+    )
+
+    /**
+     * Alternar usuário
+     */
+    .command(
+      [Commands.switchUser.name, Commands.switchUser.alias],
+      chalk.yellow('Alterna para um usuário específico'),
+      yargs => {
+        return yargs
+          .option('id', {
+            type: 'string',
+            describe: 'ID do usuário',
+          })
+          .option('email', {
+            alias: 'e',
+            type: 'string',
+            describe: 'Email do usuário',
+          })
+          .check(argv => {
+            if (!argv.id && !argv.email) {
+              throw new Error('Você deve fornecer --id ou --email');
+            }
+            return true;
+          })
+          .example(
+            `$0 ${Commands.switchUser.name} --id abc123`,
+            'Alterna para usuário por ID'
+          )
+          .example(
+            `$0 ${Commands.switchUser.name} --email joao@example.com`,
+            'Alterna para usuário por email'
+          );
+      },
+      async argv => {
+        const options: SwitchUserOptions = {};
+        if (argv.id) options.id = argv.id as string;
+        if (argv.email) options.email = argv.email as string;
+        await switchUser(options);
       }
     )
 

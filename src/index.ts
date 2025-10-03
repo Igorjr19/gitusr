@@ -16,6 +16,7 @@ import { listUsers } from './commands/list-users.js';
 import { switchUser } from './commands/switch-user.js';
 import { removeUser } from './commands/remove-user.js';
 import { status } from './commands/status.js';
+import { updateUser, type UpdateUserOptions } from './commands/update-user.js';
 import { ErrorHandler } from './utils/errors.js';
 
 function main() {
@@ -205,6 +206,75 @@ function main() {
       chalk.yellow('Mostra o usuário ativo atual'),
       () => {},
       status
+    )
+
+    /**
+     * Atualizar usuário
+     */
+    .command(
+      [
+        `${Commands.updateUser.name} <field> <value>`,
+        `${Commands.updateUser.alias} <field> <value>`,
+      ],
+      chalk.yellow('Atualiza informações de um usuário'),
+      yargs => {
+        return yargs
+          .positional('field', {
+            describe: 'Campo a ser atualizado',
+            type: 'string',
+            choices: ['key', 'name', 'email', 'nickname', 'description'],
+          })
+          .positional('value', {
+            describe: 'Novo valor para o campo',
+            type: 'string',
+          })
+          .option('id', {
+            type: 'string',
+            describe: 'ID do usuário',
+          })
+          .option('email', {
+            alias: 'e',
+            type: 'string',
+            describe: 'Email do usuário (para buscar)',
+          })
+          .option('nickname', {
+            alias: 'k',
+            type: 'string',
+            describe: 'Apelido do usuário (para buscar)',
+          })
+          .check(argv => {
+            if (!argv.id && !argv.email && !argv.nickname) {
+              throw new Error(ErrorHandler.get('missingUserIdentifier'));
+            }
+            return true;
+          })
+          .example(
+            `$0 ${Commands.updateUser.name} key "~/.ssh/new_key" --id abc123`,
+            'Atualiza chave SSH por ID'
+          )
+          .example(
+            `$0 ${Commands.updateUser.name} name "João Silva" --email joao@example.com`,
+            'Atualiza nome por email'
+          )
+          .example(
+            `$0 ${Commands.updateUser.name} email "novo@example.com" --nickname joao`,
+            'Atualiza email por nickname'
+          )
+          .example(
+            `$0 ${Commands.updateUser.name} description "Conta pessoal" --id abc123`,
+            'Atualiza descrição'
+          );
+      },
+      async argv => {
+        const options: UpdateUserOptions = {
+          field: argv.field as string,
+          value: argv.value as string,
+        };
+        if (argv.id) options.id = argv.id as string;
+        if (argv.email) options.email = argv.email as string;
+        if (argv.nickname) options.nickname = argv.nickname as string;
+        await updateUser(options);
+      }
     )
 
     /**

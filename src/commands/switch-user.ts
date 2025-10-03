@@ -79,6 +79,24 @@ export async function switchUser(options: SwitchUserOptions): Promise<void> {
     Logger.debug(`   Usuário anterior: ${activeUser?.name || 'Nenhum'}`);
     Logger.debug(`   Novo usuário: ${userToSwitch.name}`);
 
+    Logger.info('🔍 Verificando chave SSH...');
+    const keyIntegrity = await storage.verifySshKeyIntegrity(userToSwitch);
+
+    if (!keyIntegrity.valid) {
+      Logger.error(keyIntegrity.message);
+      Logger.info('💡 Use: gitusr update --id <user-id> --key <novo-caminho>');
+      return;
+    }
+
+    if (keyIntegrity.newPath) {
+      Logger.warning(keyIntegrity.message);
+      Logger.info('📝 Atualizando caminho da chave...');
+      await storage.updateSshKeyPath(userToSwitch.id, keyIntegrity.newPath);
+      userToSwitch.sshKeyPath = keyIntegrity.newPath;
+    } else {
+      Logger.success(keyIntegrity.message);
+    }
+
     const sshAgent = new SshAgent();
     const gitManager = new GitManager();
 

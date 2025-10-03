@@ -30,6 +30,7 @@ export interface GitUser {
   name: string;
   email: string;
   sshKeyPath: string;
+  sshKeyFingerprint?: string;
   description?: string;
 }
 

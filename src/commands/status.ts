@@ -27,6 +27,18 @@ export async function status(): Promise<void> {
       if (activeUser.description) {
         Logger.debug(`\tDescrição: ${activeUser.description}`);
       }
+
+      const keyIntegrity = await storage.verifySshKeyIntegrity(activeUser);
+      if (!keyIntegrity.valid) {
+        Logger.error(`\t${keyIntegrity.message}`);
+      } else if (keyIntegrity.newPath) {
+        Logger.warning(`\t${keyIntegrity.message}`);
+        Logger.info(
+          '\t💡 Execute: gitusr switch para atualizar automaticamente'
+        );
+      } else {
+        Logger.debug(`\t${keyIntegrity.message}`);
+      }
     } else {
       Logger.warning('⚠️  Nenhum usuário ativo definido');
     }

@@ -5,6 +5,7 @@ import { listUsers } from './list-users.js';
 import { removeUser } from './remove-user.js';
 import { status } from './status.js';
 import { switchUser } from './switch-user.js';
+import { updateUser } from './update-user.js';
 
 export const Commands = {
   addUser: {
@@ -36,5 +37,11 @@ export const Commands = {
     alias: 'st',
     description: 'Mostra o usuário ativo atual',
     execute: status,
+  },
+  updateUser: {
+    name: 'update',
+    alias: 'u',
+    description: 'Atualiza informações de um usuário',
+    execute: updateUser,
   },
 } satisfies Record<string, Command>;

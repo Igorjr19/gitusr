@@ -209,10 +209,19 @@ export class SecureUserStorage {
     }
 
     const store = await this.loadUsers();
-    const userId = createHash('md5').update(email).digest('hex');
 
-    if (store.users[userId]) {
-      throw new Error(`${Errors.userExistsWithEmail}: ${email}`);
+    const uniqueString = `${email}-${nickname || 'no-nickname'}-${sshKeyPath}`;
+    const userId = createHash('md5').update(uniqueString).digest('hex');
+
+    const existingUser = Object.values(store.users).find(
+      user =>
+        user.email === email &&
+        user.nickname === nickname &&
+        user.sshKeyPath === sshKeyPath
+    );
+
+    if (existingUser) {
+      throw new Error(Errors.duplicateUserData);
     }
 
     const newUser: GitUser = {
@@ -242,6 +251,7 @@ export class SecureUserStorage {
         nickname: user.nickname,
         name: user.name,
         email: user.email,
+        sshKeyPath: user.sshKeyPath,
         isActive: store.activeUser === user.id,
       };
 
@@ -259,8 +269,13 @@ export class SecureUserStorage {
   }
 
   async findUserByEmail(email: string): Promise<GitUser | null> {
-    const userId = createHash('md5').update(email).digest('hex');
-    return this.getUser(userId);
+    const users = await this.findUsersByEmail(email);
+    return users.length > 0 ? users[0] || null : null;
+  }
+
+  async findUsersByEmail(email: string): Promise<GitUser[]> {
+    const store = await this.loadUsers();
+    return Object.values(store.users).filter(user => user.email === email);
   }
 
   async getActiveUser(): Promise<GitUser | null> {

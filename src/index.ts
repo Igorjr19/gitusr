@@ -16,6 +16,7 @@ import { listUsers } from './commands/list-users.js';
 import { switchUser } from './commands/switch-user.js';
 import { removeUser } from './commands/remove-user.js';
 import { status } from './commands/status.js';
+import { ErrorHandler } from './utils/errors.js';
 
 function main() {
   yargs(hideBin(process.argv))
@@ -58,9 +59,10 @@ function main() {
             type: 'string',
             describe: 'Descrição opcional do usuário',
           })
-          .option('no-active', {
+          .option('active', {
+            alias: 'a',
             type: 'boolean',
-            describe: 'Não definir como usuário ativo após adicionar',
+            describe: 'Definir como usuário ativo após adicionar',
             default: false,
           })
           .example(
@@ -74,7 +76,7 @@ function main() {
           name: argv.name as string,
           email: argv.email as string,
           sshKeyPath: argv['ssh-key'] as string,
-          setAsActive: !argv['no-active'],
+          setAsActive: argv['active'] as boolean,
         };
         if (argv.description) {
           options.description = argv.description as string;
@@ -119,7 +121,7 @@ function main() {
           })
           .check(argv => {
             if (!argv.id && !argv.email && !argv.nickname) {
-              throw new Error('Você deve fornecer --id, --email ou --nickname');
+              throw new Error(ErrorHandler.get('missingUserIdentifier'));
             }
             return true;
           })
@@ -169,7 +171,7 @@ function main() {
           })
           .check(argv => {
             if (!argv.id && !argv.email && !argv.nickname) {
-              throw new Error('Você deve fornecer --id, --email ou --nickname');
+              throw new Error(ErrorHandler.get('missingUserIdentifier'));
             }
             return true;
           })

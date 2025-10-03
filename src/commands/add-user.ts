@@ -3,6 +3,9 @@ import type { AddUserOptions } from '../utils/types.js';
 import { SecureUserStorage } from '../utils/secure-user-storage.js';
 import { Commands } from './commands.js';
 import { Logger } from '../utils/logger.js';
+import { GitManager } from '../utils/git-manager.js';
+import { SshAgent } from '../utils/ssh-agent.js';
+import { ErrorHandler } from '../utils/errors.js';
 
 const command = Commands.addUser;
 
@@ -15,7 +18,7 @@ function validateInput(options: AddUserOptions): boolean {
   const allFieldsPresent = options.name && options.email && options.sshKeyPath;
 
   if (!allFieldsPresent) {
-    Logger.error('❌ Nome, email e caminho da chave SSH são obrigatórios.');
+    Logger.error(ErrorHandler.create('missingRequiredFields'));
     Logger.warning(
       `Uso: gitusr ${command.name} --name "Nome" --email "email@example.com" --ssh-key "/path/to/key"`
     );
@@ -23,7 +26,7 @@ function validateInput(options: AddUserOptions): boolean {
   }
 
   if (!isValidEmail(options.email)) {
-    Logger.error('❌ Email deve ser válido.');
+    Logger.error(ErrorHandler.create('invalidEmail'));
     return false;
   }
 
@@ -61,15 +64,40 @@ export async function addUser(options: AddUserOptions): Promise<void> {
 
     const shouldSetAsActive = options.setAsActive !== false;
     if (shouldSetAsActive) {
-      // TODO - Implementar ativação de usuário
+      try {
+        Logger.info('🔄 Ativando usuário...');
 
-      Logger.success('🎯 Usuário definido como ativo e configurado no Git.');
+        await storage.setActiveUser(newUser.id);
+
+        const gitManager = new GitManager();
+        if (gitManager.isGitAvailable()) {
+          gitManager.setGlobalConfig(newUser.name, newUser.email);
+        } else {
+          Logger.warning(
+            '⚠️  Git não disponível - configuração global não aplicada'
+          );
+        }
+
+        const sshAgent = new SshAgent();
+        try {
+          sshAgent.loadKey(newUser.sshKeyPath);
+          Logger.success('🔑 Chave SSH carregada');
+        } catch (sshError) {
+          Logger.warning(`⚠️  Erro ao carregar chave SSH: ${sshError}`);
+        }
+
+        Logger.success('🎯 Usuário definido como ativo e configurado no Git.');
+      } catch (activationError) {
+        Logger.error(
+          `${ErrorHandler.create('userActivationFailed')}: ${activationError}`
+        );
+      }
     }
   } catch (error) {
     if (error instanceof Error) {
-      Logger.error(`❌ Erro ao adicionar usuário: ${error.message}`);
+      Logger.error(`${ErrorHandler.create('addUserFailed')}: ${error.message}`);
     } else {
-      Logger.error('❌ Erro desconhecido ao adicionar usuário');
+      Logger.error(ErrorHandler.create('addUserFailed'));
     }
   }
 }

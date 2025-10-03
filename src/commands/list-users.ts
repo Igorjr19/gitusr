@@ -1,6 +1,7 @@
 import { SecureUserStorage } from '../utils/secure-user-storage.js';
 import { Logger } from '../utils/logger.js';
 import { Commands } from './commands.js';
+import { ErrorHandler } from '../utils/errors.js';
 
 export async function listUsers(): Promise<void> {
   const storage = new SecureUserStorage();
@@ -28,7 +29,8 @@ export async function listUsers(): Promise<void> {
       Logger.default(`\tApelido: ${user.nickname || 'N/A'}`);
       Logger.default(`\tNome: ${user.name}`);
       Logger.debug(`\tEmail: ${user.email}`);
-      Logger.debug(`\tID: ${user.id}`);
+      Logger.debug(`\tChave SSH: ${user.sshKeyPath}`);
+      Logger.debug(`\tID: ${user.id.substring(0, 8)}...`);
 
       if (user.description) {
         Logger.debug(`\tDescrição: ${user.description}`);
@@ -38,9 +40,11 @@ export async function listUsers(): Promise<void> {
     });
   } catch (error) {
     if (error instanceof Error) {
-      Logger.error(`❌ Erro ao listar usuários: ${error.message}`);
+      Logger.error(
+        `${ErrorHandler.create('listUsersFailed')}: ${error.message}`
+      );
     } else {
-      Logger.error('❌ Erro desconhecido ao listar usuários');
+      Logger.error(ErrorHandler.create('listUsersFailed'));
     }
   }
 }

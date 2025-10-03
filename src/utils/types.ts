@@ -64,6 +64,7 @@ export interface ListedUser {
   nickname?: string;
   name: string;
   email: string;
+  sshKeyPath: string;
   description?: string;
   isActive: boolean;
 }

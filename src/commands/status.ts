@@ -17,6 +17,7 @@ export async function status(): Promise<void> {
 
     if (activeUser) {
       Logger.success('✅ Usuário ativo:');
+      Logger.default(`\tApelido: ${activeUser.nickname || 'N/A'}`);
       Logger.default(`\tNome: ${activeUser.name}`);
       Logger.debug(`\tEmail: ${activeUser.email}`);
       Logger.debug(`\tID: ${activeUser.id}`);

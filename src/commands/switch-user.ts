@@ -5,9 +5,11 @@ import type { SwitchUserOptions } from '../utils/types.js';
 export async function switchUser(options: SwitchUserOptions): Promise<void> {
   const storage = new SecureUserStorage();
 
-  if (!options.id && !options.email) {
-    Logger.error('❌ ID do usuário ou email é obrigatório.');
-    Logger.warning('Uso: gitusr switch-user --id <user-id> OU --email <email>');
+  if (!options.id && !options.email && !options.nickname) {
+    Logger.error('❌ ID do usuário, email ou apelido é obrigatório.');
+    Logger.warning(
+      'Uso: gitusr switch-user --id <user-id> OU --email <email> OU --nickname <apelido>'
+    );
     return;
   }
 
@@ -26,6 +28,15 @@ export async function switchUser(options: SwitchUserOptions): Promise<void> {
 
       if (!userToSwitch) {
         Logger.error(`❌ Usuário com email ${options.email} não encontrado.`);
+        return;
+      }
+    } else if (options.nickname) {
+      userToSwitch = await storage.findUserByNickname(options.nickname);
+
+      if (!userToSwitch) {
+        Logger.error(
+          `❌ Usuário com apelido ${options.nickname} não encontrado.`
+        );
         return;
       }
     } else {
@@ -48,6 +59,8 @@ export async function switchUser(options: SwitchUserOptions): Promise<void> {
     // TODO - Adicionar configuração global do Git
 
     Logger.success('✅ Usuário alternado com sucesso!');
+    Logger.debug(`\tID: ${userToSwitch.id}`);
+    Logger.debug(`\tApelido: ${userToSwitch.nickname || 'N/A'}`);
     Logger.debug(`\tNome: ${userToSwitch.name}`);
     Logger.debug(`\tEmail: ${userToSwitch.email}`);
 

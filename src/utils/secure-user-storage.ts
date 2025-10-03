@@ -132,6 +132,7 @@ export class SecureUserStorage {
           );
 
           const user: GitUser = {
+            nickname: decryptedData.nickname,
             id: userId,
             name: decryptedData.name,
             email: decryptedData.email,
@@ -171,6 +172,10 @@ export class SecureUserStorage {
         sshKeyPath: user.sshKeyPath,
       };
 
+      if (user.nickname) {
+        sensitiveData.nickname = user.nickname;
+      }
+
       if (user.description) {
         sensitiveData.description = user.description;
       }
@@ -194,7 +199,8 @@ export class SecureUserStorage {
     name: string,
     email: string,
     sshKeyPath: string,
-    description?: string
+    description?: string,
+    nickname?: string
   ): Promise<GitUser> {
     try {
       await fs.access(sshKeyPath);
@@ -211,6 +217,7 @@ export class SecureUserStorage {
 
     const newUser: GitUser = {
       id: userId,
+      nickname,
       name,
       email,
       sshKeyPath,
@@ -232,6 +239,7 @@ export class SecureUserStorage {
     return Object.values(store.users).map(user => {
       const listUser: ListedUser = {
         id: user.id,
+        nickname: user.nickname,
         name: user.name,
         email: user.email,
         isActive: store.activeUser === user.id,
@@ -293,5 +301,15 @@ export class SecureUserStorage {
 
     await this.saveUsers(store);
     return true;
+  }
+
+  async findUserByNickname(nickname: string): Promise<GitUser | null> {
+    const store = await this.loadUsers();
+
+    const user = Object.values(store.users).find(
+      user => user.nickname === nickname
+    );
+
+    return user || null;
   }
 }

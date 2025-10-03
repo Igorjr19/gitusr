@@ -6,6 +6,7 @@ export interface UserCredentials {
 }
 
 export interface EncryptedUserData {
+  nickname?: string;
   name: string;
   email: string;
   sshKeyPath: string;
@@ -24,6 +25,7 @@ export interface UserStore {
 }
 
 export interface GitUser {
+  nickname?: string;
   id: string;
   name: string;
   email: string;
@@ -39,6 +41,7 @@ export interface Command {
 }
 
 export interface AddUserOptions {
+  nickname?: string;
   name: string;
   email: string;
   sshKeyPath: string;
@@ -48,6 +51,7 @@ export interface AddUserOptions {
 
 export interface SwitchUserOptions {
   id?: string;
+  nickname?: string;
   email?: string;
 }
 
@@ -57,6 +61,7 @@ export interface ListUsersOptions {
 
 export interface ListedUser {
   id: string;
+  nickname?: string;
   name: string;
   email: string;
   description?: string;
@@ -65,5 +70,6 @@ export interface ListedUser {
 
 export interface RemoveUserOptions {
   id?: string;
+  nickname?: string;
   email?: string;
 }

@@ -6,10 +6,10 @@ import type { RemoveUserOptions } from '../utils/types.js';
 export async function removeUser(options: RemoveUserOptions): Promise<void> {
   const storage = new SecureUserStorage();
 
-  if (!options.id && !options.email) {
-    Logger.error('❌ ID do usuário ou email é obrigatório.');
+  if (!options.id && !options.email && !options.nickname) {
+    Logger.error('❌ ID do usuário, email ou apelido é obrigatório.');
     Logger.warning(
-      `Uso: gitusr ${Commands.removeUser.name} --id <user-id> OU --email <email>`
+      `Uso: gitusr ${Commands.removeUser.name} --id <user-id> OU --email <email> OU --nickname <apelido>`
     );
     return;
   }
@@ -31,6 +31,17 @@ export async function removeUser(options: RemoveUserOptions): Promise<void> {
 
       if (!userToRemove) {
         Logger.error(`❌ Usuário com email ${options.email} não encontrado.`);
+        return;
+      }
+
+      userId = userToRemove.id;
+    } else if (options.nickname) {
+      userToRemove = await storage.findUserByNickname(options.nickname);
+
+      if (!userToRemove) {
+        Logger.error(
+          `❌ Usuário com apelido ${options.nickname} não encontrado.`
+        );
         return;
       }
 

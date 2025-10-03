@@ -25,6 +25,7 @@ export async function listUsers(): Promise<void> {
       const userIndex = Logger.indexNumber(index + 1);
 
       Logger.default(`${userIndex} ${activeIndicator}`);
+      Logger.default(`\tApelido: ${user.nickname || 'N/A'}`);
       Logger.default(`\tNome: ${user.name}`);
       Logger.debug(`\tEmail: ${user.email}`);
       Logger.debug(`\tID: ${user.id}`);

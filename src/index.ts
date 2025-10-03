@@ -30,6 +30,11 @@ function main() {
       chalk.yellow('Adiciona um novo usuário Git'),
       yargs => {
         return yargs
+          .option('nickname', {
+            alias: 'k',
+            type: 'string',
+            describe: 'Apelido do usuário (opcional)',
+          })
           .option('name', {
             alias: 'n',
             type: 'string',
@@ -65,6 +70,7 @@ function main() {
       },
       async argv => {
         const options: AddUserOptions = {
+          nickname: argv.nickname as string,
           name: argv.name as string,
           email: argv.email as string,
           sshKeyPath: argv['ssh-key'] as string,
@@ -106,9 +112,14 @@ function main() {
             type: 'string',
             describe: 'Email do usuário',
           })
+          .option('nickname', {
+            alias: 'k',
+            type: 'string',
+            describe: 'Apelido do usuário',
+          })
           .check(argv => {
-            if (!argv.id && !argv.email) {
-              throw new Error('Você deve fornecer --id ou --email');
+            if (!argv.id && !argv.email && !argv.nickname) {
+              throw new Error('Você deve fornecer --id, --email ou --nickname');
             }
             return true;
           })
@@ -119,12 +130,17 @@ function main() {
           .example(
             `$0 ${Commands.switchUser.name} --email joao@example.com`,
             'Alterna para usuário por email'
+          )
+          .example(
+            `$0 ${Commands.switchUser.name} --nickname joao`,
+            'Alterna para usuário por apelido'
           );
       },
       async argv => {
         const options: SwitchUserOptions = {};
         if (argv.id) options.id = argv.id as string;
         if (argv.email) options.email = argv.email as string;
+        if (argv.nickname) options.nickname = argv.nickname as string;
         await switchUser(options);
       }
     )
@@ -146,9 +162,14 @@ function main() {
             type: 'string',
             describe: 'Email do usuário',
           })
+          .option('nickname', {
+            alias: 'k',
+            type: 'string',
+            describe: 'Apelido do usuário',
+          })
           .check(argv => {
-            if (!argv.id && !argv.email) {
-              throw new Error('Você deve fornecer --id ou --email');
+            if (!argv.id && !argv.email && !argv.nickname) {
+              throw new Error('Você deve fornecer --id, --email ou --nickname');
             }
             return true;
           })
@@ -159,12 +180,17 @@ function main() {
           .example(
             `$0 ${Commands.removeUser.name} --email joao@example.com`,
             'Remove usuário por email'
+          )
+          .example(
+            `$0 ${Commands.removeUser.name} --nickname joao`,
+            'Remove usuário por apelido'
           );
       },
       async argv => {
         const options: RemoveUserOptions = {};
         if (argv.id) options.id = argv.id as string;
         if (argv.email) options.email = argv.email as string;
+        if (argv.nickname) options.nickname = argv.nickname as string;
         await removeUser(options);
       }
     )

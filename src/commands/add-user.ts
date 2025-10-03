@@ -44,11 +44,13 @@ export async function addUser(options: AddUserOptions): Promise<void> {
       options.name.trim(),
       options.email.trim(),
       options.sshKeyPath.trim(),
-      options.description?.trim() || undefined
+      options.description?.trim(),
+      options.nickname?.trim()
     );
 
     Logger.success('✅ Usuário adicionado com sucesso!');
     Logger.info(`\tID: ${newUser.id}`);
+    Logger.info(`\tApelido: ${newUser.nickname || 'N/A'}`);
     Logger.info(`\tNome: ${newUser.name}`);
     Logger.info(`\tEmail: ${newUser.email}`);
     Logger.info(`\tSSH Key: ${newUser.sshKeyPath}`);

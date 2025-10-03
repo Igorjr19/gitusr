@@ -18,6 +18,7 @@ import { removeUser } from './commands/remove-user.js';
 import { status } from './commands/status.js';
 import { updateUser, type UpdateUserOptions } from './commands/update-user.js';
 import { ErrorHandler } from './utils/errors.js';
+import { Logger } from './utils/logger.js';
 
 function main() {
   yargs(hideBin(process.argv))
@@ -281,6 +282,24 @@ function main() {
      * Comandos mínimos
      */
     .demandCommand(1, chalk.red('Você deve especificar um comando'))
+
+    /**
+     * Tratamento de comandos desconhecidos
+     */
+    .strictCommands()
+    .fail((msg, _err, _yargs) => {
+      if (msg) {
+        const unknownCommandMatch = msg.match(/Unknown command: (.+)/);
+        if (unknownCommandMatch) {
+          const unknownCommand = unknownCommandMatch[1]!;
+          Logger.error(ErrorHandler.create('unknownCommand', unknownCommand));
+          Logger.info(
+            `Use ${chalk.bold('gitusr --help')} para mais informações`
+          );
+        }
+        process.exit(1);
+      }
+    })
 
     /**
      * Ajuda

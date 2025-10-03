@@ -19,6 +19,7 @@ export const Errors = {
   gitConfigRemoveFailed: 'Erro ao remover configurações do Git',
 
   // Erros de validação de entrada
+  unknownCommand: (command: string) => `Comando desconhecido: ${command}`,
   missingRequiredFields: 'Nome, email e caminho da chave SSH são obrigatórios',
   invalidEmail: 'Email deve ser válido',
   missingUserIdentifier: 'ID do usuário, email ou apelido é obrigatório',

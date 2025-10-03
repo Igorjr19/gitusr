@@ -113,7 +113,10 @@ export class SecureUserStorage {
     try {
       await fs.access(this.configOptions.configDir);
     } catch {
-      await fs.mkdir(this.configOptions.configDir, { recursive: true });
+      await fs.mkdir(this.configOptions.configDir, {
+        recursive: true,
+        mode: 0o700,
+      });
     }
   }
 
@@ -193,6 +196,7 @@ export class SecureUserStorage {
       this.configOptions.storePath,
       JSON.stringify(dataToSave, null, 2)
     );
+    await fs.chmod(this.configOptions.storePath, 0o600);
   }
 
   async addUser(

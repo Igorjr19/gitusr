@@ -86,11 +86,11 @@ export async function switchUser(options: SwitchUserOptions): Promise<void> {
       const loadedKeys = sshAgent.listLoadedKeys();
       if (loadedKeys.length > 0) {
         Logger.info('🔑 Removendo chaves SSH anteriores...');
-        sshAgent.unloadAllKeys();
+        await sshAgent.unloadAllKeys();
       }
 
       Logger.info('🔑 Carregando chave SSH do novo usuário...');
-      sshAgent.loadKey(userToSwitch.sshKeyPath);
+      await sshAgent.loadKey(userToSwitch.sshKeyPath);
       Logger.success('✅ Chave SSH carregada');
     } catch (sshError) {
       Logger.warning(`⚠️  Erro ao gerenciar chaves SSH: ${sshError}`);

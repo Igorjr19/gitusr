@@ -80,7 +80,7 @@ export async function addUser(options: AddUserOptions): Promise<void> {
 
         const sshAgent = new SshAgent();
         try {
-          sshAgent.loadKey(newUser.sshKeyPath);
+          await sshAgent.loadKey(newUser.sshKeyPath);
           Logger.success('🔑 Chave SSH carregada');
         } catch (sshError) {
           Logger.warning(`⚠️  Erro ao carregar chave SSH: ${sshError}`);

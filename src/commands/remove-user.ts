@@ -107,7 +107,7 @@ export async function removeUser(options: RemoveUserOptions): Promise<void> {
           const loadedKeys = sshAgent.listLoadedKeys();
           if (loadedKeys.length > 0) {
             Logger.info('🧹 Removendo chaves SSH...');
-            sshAgent.unloadAllKeys();
+            await sshAgent.unloadAllKeys();
             Logger.success('✅ Chaves SSH removidas do agente');
           }
         } catch (sshError) {

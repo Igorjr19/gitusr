@@ -1,10 +1,12 @@
 import { existsSync, statSync } from 'fs';
+import AsyncLock from 'async-lock';
 import { Logger } from './logger.js';
 import { Errors, ErrorHandler } from './errors.js';
 import { Shell } from './shell.js';
 
 export class SshAgent {
   private shell = new Shell();
+  private lock = new AsyncLock();
 
   private isAgentRunning(): boolean {
     try {
@@ -44,43 +46,47 @@ export class SshAgent {
     }
   }
 
-  loadKey(sshKeyPath: string): void {
-    try {
-      this.validateSshKey(sshKeyPath);
-      this.ensureAgentRunning();
+  async loadKey(sshKeyPath: string): Promise<void> {
+    await this.lock.acquire('ssh-agent', async () => {
+      try {
+        this.validateSshKey(sshKeyPath);
+        this.ensureAgentRunning();
 
-      if (this.isKeyLoaded(sshKeyPath)) {
-        Logger.info(`Chave SSH ${sshKeyPath} já está carregada`);
-        return;
+        if (this.isKeyLoaded(sshKeyPath)) {
+          Logger.info(`Chave SSH ${sshKeyPath} já está carregada`);
+          return;
+        }
+
+        this.shell.runCommand(`ssh-add "${sshKeyPath}"`, 'ignore');
+        Logger.success(`Chave SSH carregada: ${sshKeyPath}`);
+      } catch (error) {
+        Logger.error(
+          `${ErrorHandler.get('sshKeyLoadFailed')} ${sshKeyPath}: ${error}`
+        );
+        throw error;
       }
-
-      this.shell.runCommand(`ssh-add "${sshKeyPath}"`, 'ignore');
-      Logger.success(`Chave SSH carregada: ${sshKeyPath}`);
-    } catch (error) {
-      Logger.error(
-        `${ErrorHandler.get('sshKeyLoadFailed')} ${sshKeyPath}: ${error}`
-      );
-      throw error;
-    }
+    });
   }
 
-  unloadKey(sshKeyPath: string): void {
-    try {
-      this.ensureAgentRunning();
+  async unloadKey(sshKeyPath: string): Promise<void> {
+    await this.lock.acquire('ssh-agent', async () => {
+      try {
+        this.ensureAgentRunning();
 
-      if (!this.isKeyLoaded(sshKeyPath)) {
-        Logger.info(`Chave SSH ${sshKeyPath} não está carregada`);
-        return;
+        if (!this.isKeyLoaded(sshKeyPath)) {
+          Logger.info(`Chave SSH ${sshKeyPath} não está carregada`);
+          return;
+        }
+
+        this.shell.runCommand(`ssh-add -d "${sshKeyPath}"`, 'ignore');
+        Logger.success(`Chave SSH removida: ${sshKeyPath}`);
+      } catch (error) {
+        Logger.error(
+          `${ErrorHandler.get('sshKeyUnloadFailed')} ${sshKeyPath}: ${error}`
+        );
+        throw error;
       }
-
-      this.shell.runCommand(`ssh-add -d "${sshKeyPath}"`, 'ignore');
-      Logger.success(`Chave SSH removida: ${sshKeyPath}`);
-    } catch (error) {
-      Logger.error(
-        `${ErrorHandler.get('sshKeyUnloadFailed')} ${sshKeyPath}: ${error}`
-      );
-      throw error;
-    }
+    });
   }
 
   isKeyLoaded(sshKeyPath: string): boolean {
@@ -119,16 +125,18 @@ export class SshAgent {
     }
   }
 
-  unloadAllKeys(): void {
-    try {
-      this.ensureAgentRunning();
+  async unloadAllKeys(): Promise<void> {
+    await this.lock.acquire('ssh-agent', async () => {
+      try {
+        this.ensureAgentRunning();
 
-      this.shell.runCommand('ssh-add -D', 'ignore');
-      Logger.success('Todas as chaves SSH foram removidas do agente');
-    } catch (error) {
-      Logger.error(`${ErrorHandler.get('sshKeyUnloadFailed')}: ${error}`);
-      throw error;
-    }
+        this.shell.runCommand('ssh-add -D', 'ignore');
+        Logger.success('Todas as chaves SSH foram removidas do agente');
+      } catch (error) {
+        Logger.error(`${ErrorHandler.get('sshKeyUnloadFailed')}: ${error}`);
+        throw error;
+      }
+    });
   }
 
   getAgentInfo(): { running: boolean; keyCount: number; socketPath?: string } {

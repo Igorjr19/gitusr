@@ -9,7 +9,6 @@ export const Errors = {
     'SSH agent não está rodando. Execute: eval "$(ssh-agent -s)"',
   sshKeyLoadFailed: 'Erro ao carregar chave SSH',
   sshKeyUnloadFailed: 'Erro ao remover chave SSH',
-  sshConnectivityFailed: 'Falha na conectividade SSH',
   sshKeyPermissions:
     'Chave SSH tem permissões inseguras. Recomendado: chmod 600',
 

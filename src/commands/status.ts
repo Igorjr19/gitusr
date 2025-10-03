@@ -65,12 +65,6 @@ export async function status(): Promise<void> {
         loadedKeys.forEach((key, index) => {
           Logger.default(`\t\t${index + 1}. ${key}`);
         });
-
-        Logger.info('\t🔗 Testando conectividade...');
-        const isConnected = sshAgent.testGitHubConnection();
-        Logger.default(
-          `\tGitHub SSH: ${isConnected ? '✅ Conectado' : '❌ Falha na conexão'}`
-        );
       } else {
         Logger.warning('\t⚠️  Nenhuma chave SSH carregada');
       }

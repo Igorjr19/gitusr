@@ -127,14 +127,6 @@ export async function switchUser(options: SwitchUserOptions): Promise<void> {
       const currentConfig = gitManager.getGlobalConfig();
       Logger.default(`\tuser.name = ${currentConfig.name || 'não definido'}`);
       Logger.default(`\tuser.email = ${currentConfig.email || 'não definido'}`);
-
-      Logger.info('🔗 Testando conectividade SSH...');
-      const isConnected = sshAgent.testGitHubConnection();
-      if (isConnected) {
-        Logger.success('✅ Conexão SSH com GitHub funcionando');
-      } else {
-        Logger.warning('⚠️  Problemas na conexão SSH com GitHub');
-      }
     } catch {
       Logger.warning('⚠️  Erro ao verificar configurações');
     }

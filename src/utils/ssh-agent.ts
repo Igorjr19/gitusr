@@ -128,36 +128,6 @@ export class SshAgent {
     }
   }
 
-  testGitHubConnection(): boolean {
-    try {
-      this.ensureAgentRunning();
-
-      const output = execSync('ssh -T git@github.com', {
-        encoding: 'utf8',
-        stdio: 'pipe',
-      });
-
-      return output.includes('successfully authenticated');
-    } catch (error) {
-      const execError = error as {
-        status?: number;
-        stderr?: string;
-        message?: string;
-      };
-      if (
-        execError.status === 1 &&
-        execError.stderr?.includes('successfully authenticated')
-      ) {
-        return true;
-      }
-
-      Logger.error(
-        `${ErrorHandler.get('sshConnectivityFailed')}: ${execError.stderr || execError.message || ErrorHandler.get('unknownError')}`
-      );
-      return false;
-    }
-  }
-
   getAgentInfo(): { running: boolean; keyCount: number; socketPath?: string } {
     const running = this.isAgentRunning();
     const keyCount = running ? this.listLoadedKeys().length : 0;

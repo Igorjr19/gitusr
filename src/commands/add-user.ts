@@ -1,6 +1,6 @@
 import type { AddUserOptions } from '../utils/types.js';
 
-import { SecureUserStorage } from '../utils/secure-user-storage.js';
+import { UserStorage } from '../utils/user-storage.js';
 import { Commands } from './commands.js';
 import { Logger } from '../utils/logger.js';
 import { GitManager } from '../utils/git-manager.js';
@@ -34,7 +34,7 @@ function validateInput(options: AddUserOptions): boolean {
 }
 
 export async function addUser(options: AddUserOptions): Promise<void> {
-  const storage = new SecureUserStorage();
+  const storage = new UserStorage();
 
   if (!validateInput(options)) {
     return;

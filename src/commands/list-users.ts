@@ -1,10 +1,10 @@
-import { SecureUserStorage } from '../utils/secure-user-storage.js';
+import { UserStorage } from '../utils/user-storage.js';
 import { Logger } from '../utils/logger.js';
 import { Commands } from './commands.js';
 import { ErrorHandler } from '../utils/errors.js';
 
 export async function listUsers(): Promise<void> {
-  const storage = new SecureUserStorage();
+  const storage = new UserStorage();
 
   try {
     Logger.info('📋 Listando usuários cadastrados...');

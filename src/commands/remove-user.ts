@@ -1,4 +1,4 @@
-import { SecureUserStorage } from '../utils/secure-user-storage.js';
+import { UserStorage } from '../utils/user-storage.js';
 import { Logger } from '../utils/logger.js';
 import { Commands } from './commands.js';
 import type { RemoveUserOptions } from '../utils/types.js';
@@ -7,7 +7,7 @@ import { SshAgent } from '../utils/ssh-agent.js';
 import { ErrorHandler } from '../utils/errors.js';
 
 export async function removeUser(options: RemoveUserOptions): Promise<void> {
-  const storage = new SecureUserStorage();
+  const storage = new UserStorage();
 
   if (!options.id && !options.email && !options.nickname) {
     Logger.error(ErrorHandler.create('missingUserIdentifier'));

@@ -1,25 +1,32 @@
-import { execSync } from 'child_process';
+import { spawnSync } from 'child_process';
 import { Logger } from './logger.js';
 
 export class Shell {
-  private escapeShellArg(arg: string): string {
-    return arg.replace(/(["$`\\])/g, '\\$1');
-  }
-
   runCommand(
     command: string,
-    stdio: 'ignore' | 'inherit' | 'overlapped' | 'pipe'
+    args: string[],
+    stdio: 'ignore' | 'inherit' | 'pipe' = 'pipe'
   ): string {
     try {
-      const escapedCommand = this.escapeShellArg(command);
+      const result = spawnSync(command, args, {
+        stdio: stdio === 'pipe' ? ['pipe', 'pipe', 'pipe'] : stdio,
+        encoding: 'utf8',
+        shell: false,
+      });
 
-      if (stdio === 'pipe') {
-        return execSync(escapedCommand, { encoding: 'utf8' }).trim();
+      if (result.error) {
+        throw result.error;
       }
 
-      return execSync(escapedCommand, { stdio }).toString();
+      if (result.status !== 0 && stdio !== 'ignore') {
+        const errorMsg =
+          result.stderr || `Comando falhou com código ${result.status}`;
+        throw new Error(errorMsg);
+      }
+
+      return stdio === 'pipe' ? (result.stdout || '').trim() : '';
     } catch (error) {
-      Logger.error(`Erro ao executar comando: ${error}`);
+      Logger.error(`Erro ao executar comando ${command}: ${error}`);
       throw error;
     }
   }

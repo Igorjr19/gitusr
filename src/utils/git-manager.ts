@@ -7,7 +7,7 @@ export class GitManager {
 
   isGitAvailable(): boolean {
     try {
-      this.shell.runCommand('git --version', 'ignore');
+      this.shell.runCommand('git', ['--version'], 'ignore');
       return true;
     } catch {
       Logger.error(ErrorHandler.create('gitNotAvailable'));
@@ -22,11 +22,13 @@ export class GitManager {
       }
 
       this.shell.runCommand(
-        `git config --global user.name "${name}"`,
+        'git',
+        ['config', '--global', 'user.name', name],
         'ignore'
       );
       this.shell.runCommand(
-        `git config --global user.email "${email}"`,
+        'git',
+        ['config', '--global', 'user.email', email],
         'ignore'
       );
 
@@ -46,11 +48,11 @@ export class GitManager {
       }
 
       const name = this.shell
-        .runCommand('git config --global user.name', 'pipe')
+        .runCommand('git', ['config', '--global', 'user.name'], 'pipe')
         .trim();
 
       const email = this.shell
-        .runCommand('git config --global user.email', 'pipe')
+        .runCommand('git', ['config', '--global', 'user.email'], 'pipe')
         .trim();
 
       return { name, email };
@@ -66,7 +68,11 @@ export class GitManager {
         throw new Error('Git não está disponível');
       }
 
-      this.shell.runCommand(`git config --global --unset ${key}`, 'ignore');
+      this.shell.runCommand(
+        'git',
+        ['config', '--global', '--unset', key],
+        'ignore'
+      );
       Logger.info(`Configuração ${key} removida`);
     } catch (error) {
       Logger.error(
@@ -83,7 +89,7 @@ export class GitManager {
       }
 
       const output = this.shell
-        .runCommand('git config --global --list', 'pipe')
+        .runCommand('git', ['config', '--global', '--list'], 'pipe')
         .trim();
       const config: Record<string, string> = {};
 
@@ -103,7 +109,7 @@ export class GitManager {
 
   isGitRepository(): boolean {
     try {
-      this.shell.runCommand('git rev-parse --git-dir', 'ignore');
+      this.shell.runCommand('git', ['rev-parse', '--git-dir'], 'ignore');
       return true;
     } catch {
       return false;

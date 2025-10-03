@@ -1,4 +1,4 @@
-import { SecureUserStorage } from '../utils/secure-user-storage.js';
+import { UserStorage } from '../utils/user-storage.js';
 import { Logger } from '../utils/logger.js';
 import { ErrorHandler } from '../utils/errors.js';
 
@@ -21,7 +21,7 @@ const VALID_FIELDS: UpdateableField[] = [
 ];
 
 export async function updateUser(options: UpdateUserOptions): Promise<void> {
-  const storage = new SecureUserStorage();
+  const storage = new UserStorage();
 
   if (!options.id && !options.email && !options.nickname) {
     Logger.error(ErrorHandler.create('missingUserIdentifier'));

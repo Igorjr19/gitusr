@@ -1,11 +1,11 @@
 import { Logger } from '../utils/logger.js';
-import { SecureUserStorage } from '../utils/secure-user-storage.js';
+import { UserStorage } from '../utils/user-storage.js';
 import { GitManager } from '../utils/git-manager.js';
 import { SshAgent } from '../utils/ssh-agent.js';
 import { ErrorHandler } from '../utils/errors.js';
 
 export async function status(): Promise<void> {
-  const storage = new SecureUserStorage();
+  const storage = new UserStorage();
   const gitManager = new GitManager();
   const sshAgent = new SshAgent();
 

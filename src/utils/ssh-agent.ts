@@ -10,7 +10,7 @@ export class SshAgent {
 
   private isAgentRunning(): boolean {
     try {
-      this.shell.runCommand('ssh-add -l', 'ignore');
+      this.shell.runCommand('ssh-add', ['-l'], 'ignore');
       return true;
     } catch {
       return false;
@@ -57,7 +57,7 @@ export class SshAgent {
           return;
         }
 
-        this.shell.runCommand(`ssh-add "${sshKeyPath}"`, 'ignore');
+        this.shell.runCommand('ssh-add', [sshKeyPath], 'ignore');
         Logger.success(`Chave SSH carregada: ${sshKeyPath}`);
       } catch (error) {
         Logger.error(
@@ -78,7 +78,7 @@ export class SshAgent {
           return;
         }
 
-        this.shell.runCommand(`ssh-add -d "${sshKeyPath}"`, 'ignore');
+        this.shell.runCommand('ssh-add', ['-d', sshKeyPath], 'ignore');
         Logger.success(`Chave SSH removida: ${sshKeyPath}`);
       } catch (error) {
         Logger.error(
@@ -94,12 +94,13 @@ export class SshAgent {
       this.ensureAgentRunning();
 
       const publicKeyOutput = this.shell.runCommand(
-        `ssh-keygen -y -f "${sshKeyPath}"`,
+        'ssh-keygen',
+        ['-y', '-f', sshKeyPath],
         'pipe'
       );
       const publicKey = publicKeyOutput.trim();
 
-      const loadedKeys = this.shell.runCommand('ssh-add -L', 'pipe');
+      const loadedKeys = this.shell.runCommand('ssh-add', ['-L'], 'pipe');
 
       return loadedKeys.includes(publicKey);
     } catch {
@@ -111,7 +112,7 @@ export class SshAgent {
     try {
       this.ensureAgentRunning();
 
-      const output = this.shell.runCommand('ssh-add -l', 'pipe');
+      const output = this.shell.runCommand('ssh-add', ['-l'], 'pipe');
 
       return output
         .split('\n')
@@ -130,7 +131,7 @@ export class SshAgent {
       try {
         this.ensureAgentRunning();
 
-        this.shell.runCommand('ssh-add -D', 'ignore');
+        this.shell.runCommand('ssh-add', ['-D'], 'ignore');
         Logger.success('Todas as chaves SSH foram removidas do agente');
       } catch (error) {
         Logger.error(`${ErrorHandler.get('sshKeyUnloadFailed')}: ${error}`);

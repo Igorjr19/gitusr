@@ -1,6 +1,5 @@
 export const Errors = {
-  // Erros de dados/criptografia
-  corruptedEncryptedData: 'Dados criptografados corrompidos',
+  // Erros de dados
   userExistsWithEmail: 'Usuário com este email já existe',
 
   // Erros de SSH

@@ -1,11 +1,13 @@
-import { execSync } from 'child_process';
 import { Logger } from './logger.js';
 import { ErrorHandler } from './errors.js';
+import { Shell } from './shell.js';
 
 export class GitManager {
+  private shell = new Shell();
+
   isGitAvailable(): boolean {
     try {
-      execSync('git --version', { stdio: 'ignore' });
+      this.shell.runCommand('git --version', 'ignore');
       return true;
     } catch {
       Logger.error(ErrorHandler.create('gitNotAvailable'));
@@ -19,10 +21,14 @@ export class GitManager {
         throw new Error('Git não está disponível');
       }
 
-      execSync(`git config --global user.name "${name}"`, { stdio: 'ignore' });
-      execSync(`git config --global user.email "${email}"`, {
-        stdio: 'ignore',
-      });
+      this.shell.runCommand(
+        `git config --global user.name "${name}"`,
+        'ignore'
+      );
+      this.shell.runCommand(
+        `git config --global user.email "${email}"`,
+        'ignore'
+      );
 
       Logger.info(
         `Configurações globais do Git atualizadas para: ${name} <${email}>`
@@ -39,13 +45,13 @@ export class GitManager {
         return {};
       }
 
-      const name = execSync('git config --global user.name', {
-        encoding: 'utf8',
-      }).trim();
+      const name = this.shell
+        .runCommand('git config --global user.name', 'pipe')
+        .trim();
 
-      const email = execSync('git config --global user.email', {
-        encoding: 'utf8',
-      }).trim();
+      const email = this.shell
+        .runCommand('git config --global user.email', 'pipe')
+        .trim();
 
       return { name, email };
     } catch (error) {
@@ -60,7 +66,7 @@ export class GitManager {
         throw new Error('Git não está disponível');
       }
 
-      execSync(`git config --global --unset ${key}`, { stdio: 'ignore' });
+      this.shell.runCommand(`git config --global --unset ${key}`, 'ignore');
       Logger.info(`Configuração ${key} removida`);
     } catch (error) {
       Logger.error(
@@ -76,9 +82,9 @@ export class GitManager {
         return {};
       }
 
-      const output = execSync('git config --global --list', {
-        encoding: 'utf8',
-      });
+      const output = this.shell
+        .runCommand('git config --global --list', 'pipe')
+        .trim();
       const config: Record<string, string> = {};
 
       output.split('\n').forEach(line => {
@@ -97,7 +103,7 @@ export class GitManager {
 
   isGitRepository(): boolean {
     try {
-      execSync('git rev-parse --git-dir', { stdio: 'ignore' });
+      this.shell.runCommand('git rev-parse --git-dir', 'ignore');
       return true;
     } catch {
       return false;

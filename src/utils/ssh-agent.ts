@@ -1,12 +1,14 @@
-import { execSync } from 'child_process';
 import { existsSync, statSync } from 'fs';
 import { Logger } from './logger.js';
 import { Errors, ErrorHandler } from './errors.js';
+import { Shell } from './shell.js';
 
 export class SshAgent {
+  private shell = new Shell();
+
   private isAgentRunning(): boolean {
     try {
-      execSync('ssh-add -l', { stdio: 'ignore' });
+      this.shell.runCommand('ssh-add -l', 'ignore');
       return true;
     } catch {
       return false;
@@ -52,7 +54,7 @@ export class SshAgent {
         return;
       }
 
-      execSync(`ssh-add "${sshKeyPath}"`, { stdio: 'ignore' });
+      this.shell.runCommand(`ssh-add "${sshKeyPath}"`, 'ignore');
       Logger.success(`Chave SSH carregada: ${sshKeyPath}`);
     } catch (error) {
       Logger.error(
@@ -71,7 +73,7 @@ export class SshAgent {
         return;
       }
 
-      execSync(`ssh-add -d "${sshKeyPath}"`, { stdio: 'ignore' });
+      this.shell.runCommand(`ssh-add -d "${sshKeyPath}"`, 'ignore');
       Logger.success(`Chave SSH removida: ${sshKeyPath}`);
     } catch (error) {
       Logger.error(
@@ -85,12 +87,13 @@ export class SshAgent {
     try {
       this.ensureAgentRunning();
 
-      const publicKeyOutput = execSync(`ssh-keygen -y -f "${sshKeyPath}"`, {
-        encoding: 'utf8',
-      });
+      const publicKeyOutput = this.shell.runCommand(
+        `ssh-keygen -y -f "${sshKeyPath}"`,
+        'pipe'
+      );
       const publicKey = publicKeyOutput.trim();
 
-      const loadedKeys = execSync('ssh-add -L', { encoding: 'utf8' });
+      const loadedKeys = this.shell.runCommand('ssh-add -L', 'pipe');
 
       return loadedKeys.includes(publicKey);
     } catch {
@@ -102,7 +105,7 @@ export class SshAgent {
     try {
       this.ensureAgentRunning();
 
-      const output = execSync('ssh-add -l', { encoding: 'utf8' });
+      const output = this.shell.runCommand('ssh-add -l', 'pipe');
 
       return output
         .split('\n')
@@ -120,7 +123,7 @@ export class SshAgent {
     try {
       this.ensureAgentRunning();
 
-      execSync('ssh-add -D', { stdio: 'ignore' });
+      this.shell.runCommand('ssh-add -D', 'ignore');
       Logger.success('Todas as chaves SSH foram removidas do agente');
     } catch (error) {
       Logger.error(`${ErrorHandler.get('sshKeyUnloadFailed')}: ${error}`);
